@@ -1,9 +1,9 @@
 import sqlalchemy
-from database import db
+from .database import db
 from flask import Flask, redirect
 from flask_admin import Admin
-from poroshok_loader import PoroshokLoader
-from poroshok_view import PoroshokView
+from .poroshok_loader import PoroshokLoader
+from .poroshok_view import PoroshokView
 from app.poroshok import Poroshok
 
 app = Flask(__name__)
