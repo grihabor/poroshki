@@ -1,6 +1,6 @@
 import vk
-
-from app.poroshok import Poroshok
+import sqlalchemy
+from app import Poroshok, db
 
 
 def process_text(text):
@@ -52,3 +52,24 @@ class PoroshokLoader():
         return poroshok_list
 
     #def get_full_poroshok_list(self):
+
+
+def load_data():
+
+    def is_in_db(id):
+        query = db.session.query(
+            Poroshok.id
+        ).filter(Poroshok.id==id)
+        try:
+            query.one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            return False
+        return True
+
+    loader = PoroshokLoader()
+    poroshok_list = loader.get_poroshok_list()
+
+    for poroshok in poroshok_list:
+        if not is_in_db(poroshok.id):
+            db.session.add(poroshok)
+    db.session.commit()

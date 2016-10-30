@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime
 
-from app.database import Base
+from app import Base
 
 
 class Poroshok(Base):
