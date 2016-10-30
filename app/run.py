@@ -1,6 +1,6 @@
 import sqlalchemy
 from database import db
-from flask import Flask
+from flask import Flask, redirect
 from flask_admin import Admin
 from poroshok_loader import PoroshokLoader
 from poroshok_view import PoroshokView
@@ -32,5 +32,10 @@ for poroshok in poroshok_list:
     if not is_in_db(poroshok.id):
         db.session.add(poroshok)
 db.session.commit()
+
+
+@app.route('/')
+def admin():
+    return redirect('/admin')
 
 app.run(debug=True)
