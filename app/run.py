@@ -18,4 +18,4 @@ def admin():
 
 #load_data()
 
-app.run(debug=True)
+app.run(debug=False)
