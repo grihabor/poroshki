@@ -21,7 +21,7 @@ class PoroshokLoader():
         )[0]
         self.group_id = '-{}'.format(self.group['gid'])
 
-    def load_post_list(self, count=None):
+    def load_post_list(self, count=None, offset=None):
         if not count:
             count = 100
         elif count > 100:
@@ -29,14 +29,14 @@ class PoroshokLoader():
         self.post_count, *post_list = self.api('wall.get',
             owner_id=self.group_id,
             filter='owner',
-            count=100,
-            offset=1,
+            count=count,
+            offset=offset if offset else 0,
             fields=['id', 'name']
         )
         return post_list
 
-    def get_poroshok_list(self, count=None):
-        post_list = self.load_post_list(count)
+    def get_poroshok_list(self, count=None, offset=None):
+        post_list = self.load_post_list(count, offset)
         poroshok_list = []
         for post_json in post_list:
             id = post_json['id']
@@ -67,9 +67,28 @@ def load_data():
         return True
 
     loader = PoroshokLoader()
-    poroshok_list = loader.get_poroshok_list()
 
-    for poroshok in poroshok_list:
-        if not is_in_db(poroshok.id):
-            db.session.add(poroshok)
-    db.session.commit()
+    i = 0
+    total_count_added = 0
+    total_count_loaded = 0
+
+    while True:
+        count_added = 0
+
+        poroshok_list = loader.get_poroshok_list(offset=100*i)
+        if not poroshok_list:
+            break
+        count_loaded = len(poroshok_list)
+
+        for poroshok in poroshok_list:
+            if not is_in_db(poroshok.id):
+                db.session.add(poroshok)
+                count_added += 1
+        db.session.commit()
+
+        print('iter {}: {} added - {} loaded'.format(i, count_added, count_loaded))
+        i += 1
+        total_count_added += count_added
+        total_count_loaded += count_loaded
+
+    print('Total: {} added - {} loaded'.format(total_count_added, total_count_loaded))
