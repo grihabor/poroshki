@@ -3,13 +3,6 @@ import sqlalchemy
 from app import Poroshok, db
 
 
-def process_text(text):
-
-    if len(text) > 1024:
-        return False
-    text = '\n'.join([line.strip() for line in text.split('<br>')])
-    return text
-
 class PoroshokLoader():
     def __init__(self):
         self.group_id = 'sandalporoshki'
@@ -41,17 +34,16 @@ class PoroshokLoader():
         for post_json in post_list:
             id = post_json['id']
             date = post_json['date']
-            text = process_text(post_json['text'])
+            text = post_json['text']
             like_count = post_json['likes']['count']
             repost_count = post_json['reposts']['count']
             if not text:
                 continue
             poroshok = Poroshok(id, text, date, like_count, repost_count)
-            poroshok_list.append(poroshok)
+            if poroshok.text:
+                poroshok_list.append(poroshok)
 
         return poroshok_list
-
-    #def get_full_poroshok_list(self):
 
 
 def load_data():
@@ -86,7 +78,7 @@ def load_data():
                 count_added += 1
         db.session.commit()
 
-        print('iter {}: {} added - {} loaded'.format(i, count_added, count_loaded))
+        print('iter {:>3}: {:>3} added - {:>3} loaded'.format(i, count_added, count_loaded))
         i += 1
         total_count_added += count_added
         total_count_loaded += count_loaded

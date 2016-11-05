@@ -9,7 +9,8 @@ class Poroshok(Base):
     __tablename__ = 'poroshki'
 
     id = Column(Integer, primary_key=True)
-    text = Column(String(1024, convert_unicode=True), nullable=False)
+    text_length = Column(Integer)
+    text = Column(String(512, convert_unicode=True), nullable=False)
     posted = Column(DateTime)
     like_count = Column(Integer)
     repost_count = Column(Integer)
@@ -28,10 +29,43 @@ class Poroshok(Base):
 
         self.like_count = like_count
         self.repost_count = repost_count
-        self.text = text
+        self.text = self.process_text(text)
+        self.text_length = len(self.text)
         self.posted = datetime.fromtimestamp(timestamp)
         self.id = id
 
     def __repr__(self):
         return '<Poroshok [id:{}]>'.format(self.id)
+
+    def process_text(self, text):
+        """
+        Takes poroshok text and performs formatting.
+        :param text:
+            poroshok text
+        :return: str:
+            returns formatted poroshok text or empty string for non-poroshok
+        """
+
+        # skip if long text
+        if len(text) > 512:
+            return ''
+
+        lines = []
+        ok = False
+
+        for line in text.split('<br>'):
+            line = line.strip()
+            if not line:
+                continue
+
+            lines.append(line)
+            # if author in the line then break the loop
+            if '©' in line or '(c)' in line or '(с)' in line:
+                if len(lines) < 5:
+                    break
+                ok = True
+                break
+
+        text = '\n'.join(lines) if ok else ''
+        return text
 

@@ -16,6 +16,6 @@ admin.add_view(PoroshokView(Poroshok, db.session))
 def admin():
     return redirect('/admin')
 
-#load_data()
+load_data()
 
 app.run(debug=False)
